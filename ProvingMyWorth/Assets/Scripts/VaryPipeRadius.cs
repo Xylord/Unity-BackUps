@@ -10,7 +10,7 @@ public class VaryPipeRadius : MonoBehaviour {
     private Mesh mesh;
     private Vector3[] vertices;
     private int[] triangles;
-    private float curveAngle, pipeRadVar = 0.3f;
+    private float curveAngle, pipeRadVar = 0.1F;//.3f;
 
 
     // Use this for initialization
@@ -26,6 +26,7 @@ public class VaryPipeRadius : MonoBehaviour {
     private Vector3 GetPointOnTorus(float u, float v, float pipeRadDelta)
     {
         Vector3 p;
+
         float pipeRadius = VaryPipeSys.pipeRadius + pipeRadDelta;
         float r = (curveRadius + pipeRadius * Mathf.Cos(v));
         p.x = r * Mathf.Sin(u);
