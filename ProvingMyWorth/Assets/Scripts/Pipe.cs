@@ -2,36 +2,31 @@
 using System.Collections;
 
 public class Pipe : MonoBehaviour {
-
+    //private GameObject pipe;
     private Mesh mesh;
+    //private MeshCollider meshCollider;
     private Vector3[] vertices;
     private int[] triangles;
-    private float curveAngle;//, pipeRadVar;
-
-    private float curveRadius;
+    private float arcLength, curveAngle, curveRadius, relativeRotation, deltaDistance;
+    
     private int curveSegmentCount;
 
     private PipeSystem pipeSystem;
 
-    //public float pipeRadius, ringDistance;
-    public float ringDistance;
-    public int pipeSegmentCount;
-
     public float minCurveRadius, maxCurveRadius,
-        pipeRadiusFactor;//, pipeChangeFactor;//, minPipeRadius, maxPipeRadius;
+        ringDistance;
 
-    public int minCurveSegmentCount, maxCurveSegmentCount;
+    public int minCurveSegmentCount, maxCurveSegmentCount,
+        pipeSegmentCount;
 
     static private int pipeNumber = 0;
     static private float lastQuadRadius;
 
     private bool lastQuad = false;
 
-    //static private Vector3[] verticesToPassOn;
-
     // Use this for initialization
     void Start () {
-        //verticesToPassOn = new Vector3[pipeSegmentCount * curveSegmentCount * 4];
+        
     }
 	
 	// Update is called once per frame
@@ -43,20 +38,36 @@ public class Pipe : MonoBehaviour {
     {
         GetComponent<MeshFilter>().mesh = mesh = new Mesh();
         mesh.name = "Pipe";
+        
+        
+
+    }
+
+    public void Generate ()
+    {
         GameObject mainPipeSystem = GameObject.Find("PipeSystem");
         pipeSystem = mainPipeSystem.GetComponent<PipeSystem>();
 
-        //verticesToPassOn = new Vector3[pipeSegmentCount * curveSegmentCount * 4];
+        GetComponent<MeshRenderer>().material = pipeSystem.pipeMaterial;
 
         this.name = "pipe" + pipeNumber.ToString();
         pipeNumber++;
         
         curveRadius = Random.Range(minCurveRadius, maxCurveRadius);
         curveSegmentCount = Random.Range(minCurveSegmentCount, maxCurveSegmentCount + 1);
+        curveAngle = ringDistance * (360f / (2f * Mathf.PI));
+        arcLength = 2 * Mathf.PI * curveRadius * curveAngle / 360;
+        deltaDistance = arcLength / curveSegmentCount;
 
+        mesh.Clear();
         SetVertices();
         SetTriangles();
         mesh.RecalculateNormals();
+
+        /*meshCollider = this.gameObject.AddComponent<MeshCollider>();
+        meshCollider.sharedMesh = mesh;
+        meshCollider.convex = true;
+        meshCollider.isTrigger = true;*/
     }
 
     void SetVertices()
@@ -65,7 +76,7 @@ public class Pipe : MonoBehaviour {
         //verticesToPassOn = new Vector3[pipeSegmentCount * curveSegmentCount * 4];
 
         float uStep = ringDistance / curveSegmentCount;
-        curveAngle = uStep * curveSegmentCount * (360f / (2f * Mathf.PI));
+        // = uStep * curveSegmentCount * (360f / (2f * Mathf.PI));
         CreateFirstQuadRing(uStep);
         int iDelta = pipeSegmentCount * 4;
         for (int u = 2, i = iDelta; u <= curveSegmentCount; u++, i += iDelta)
@@ -105,13 +116,8 @@ public class Pipe : MonoBehaviour {
             vertices[i + 2] = vertex;
             vertices[i + 3] = vertex = GetPointOnTorus(u, v * vStep, false);
         }
-
-        pipeSystem.ChangePipeRadius();
-
-        //print(this.name + " " + pipeSystem.PipeRadius + " " + pipeSystem.PipeRadChange);
-        //pipeRadius -= 0.1f;
-        //TRYHAARDALERT
-
+        pipeSystem.SetPipeDistance(pipeSystem.PipeDistance + deltaDistance);
+        pipeSystem.SetPipeRadius(pipeSystem.CalculatePipeRadius(pipeSystem.PipeDistance));
     }
 
     void CreateFirstQuadRing(float u)
@@ -121,54 +127,17 @@ public class Pipe : MonoBehaviour {
         Vector3 vertexA = GetPointOnTorus(0f, 0f, true);//-pipeSystem.PipeRadChange);
         Vector3 vertexB = GetPointOnTorus(u, 0f, true);
 
-        print(this.name + " " + pipeSystem.PipeRadius);
+        //print(this.name + " " + pipeSystem.PipeRadius);
 
         for (int v = 1, i = 0; v <= pipeSegmentCount; v++, i += 4)
         {
-            
-
-            /*if (pipeSystem.PipeRadius < pipeSystem.maxPipeRadius && pipeSystem.PipeRadius > pipeSystem.minPipeRadius
-                && pipeSystem.PipeRadChange != 0)// && pipeSystem.noRadChange)
-            {
-                int signFactor = 0;
-
-                if (pipeSystem.PipeRadChange > 0)
-                {
-                    signFactor = 1;
-                    print(this.name + " neg");
-                }
-                else if (pipeSystem.PipeRadChange < 0)
-                {
-                    signFactor = -1;
-                    print(this.name + " pos");
-                }
-
-                print("thing" + pipeSystem.noRadChange);
-                signFactor = 1;
-
-                vertices[i] = vertexA = GetPointOnTorus(0f, (v - 1) * vStep, -signFactor * pipeSystem.PipeRadChange);
-                vertices[i + 1] = vertexA = GetPointOnTorus(0f, v * vStep, -signFactor * pipeSystem.PipeRadChange);
-                vertices[i + 2] = vertexB = GetPointOnTorus(u, (v - 1) * vStep, -signFactor * pipeSystem.PipeRadChange);
-                vertices[i + 3] = vertexB = GetPointOnTorus(u, v * vStep, -signFactor * pipeSystem.PipeRadChange);
-
-                vertexA = GetPointOnTorus(0f, v * vStep, 0);
-                vertexB = GetPointOnTorus(u, v * vStep, 0);
-            }
-            else
-            {*/
-
             vertices[i] = vertexA;
             vertices[i + 1] = vertexA = GetPointOnTorus(0f, v * vStep, true);
             vertices[i + 2] = vertexB;
             vertices[i + 3] = vertexB = GetPointOnTorus(u, v * vStep, true);
-            //}
-            //print(this.name + " first " + vertices[i] + " " + vertices[i + 1] + " " + vertices[i + 2] + " " + vertices[i + 3]);
-
         }
-
-        pipeSystem.ChangePipeRadius();
-
-        //print(this.name + " " + pipeSystem.PipeRadius + " " + pipeSystem.PipeRadChange);
+        pipeSystem.SetPipeDistance(pipeSystem.PipeDistance + deltaDistance);
+        pipeSystem.SetPipeRadius(pipeSystem.CalculatePipeRadius(pipeSystem.PipeDistance));
     }
 
     Vector3 GetPointOnTorus(float u, float v, bool firstQuad)
@@ -177,23 +146,31 @@ public class Pipe : MonoBehaviour {
         float pipeRadius;
 
         if (firstQuad)
+        {
             pipeRadius = lastQuadRadius;
+            //print("first " + pipeRadius);
+        }
         else
-            pipeRadius = (pipeSystem.PipeRadius) * pipeRadiusFactor;
+            pipeRadius = (pipeSystem.PipeRadius);
 
         float r = (curveRadius + pipeRadius * Mathf.Cos(v));
         p.x = r * Mathf.Sin(u);
         p.y = r * Mathf.Cos(u);
         p.z = pipeRadius * Mathf.Sin(v);
 
-        if (lastQuad) lastQuadRadius = pipeRadius;
+        if (lastQuad)
+        {
+            lastQuadRadius = pipeRadius;
+            //print("last " + lastQuadRadius);
+        }
 
         return p;
     }
 
     public void AlignWith (Pipe pipe)
     {
-        float relativeRotation = Random.Range(0, curveSegmentCount) * 360f / pipeSegmentCount;
+        relativeRotation = Random.Range(0, curveSegmentCount) * 360f / pipeSegmentCount;
+        print(relativeRotation);
 
         transform.SetParent(pipe.transform, false);
         transform.localPosition = Vector3.zero;
@@ -214,27 +191,27 @@ public class Pipe : MonoBehaviour {
         }
     }
 
-    /*public void SetPipeSystem (PipeSystem foo)
+    public float CurveAngle
     {
-        pipeSystem = foo;
-    }*/
-
-    /*void OnDrawGizmos()
-    {
-        float vStep = (2f * Mathf.PI) / pipeSegmentCount;
-
-        Vector3 vertexA = GetPointOnTorus(0f, 0f, 0f);//-PipeSystem.pipeRadChange);
-        Vector3 vertexB = GetPointOnTorus(ringDistance / curveSegmentCount, 0f, 0f);
-    
-
-        for (int v = 1, i = 0; v <= pipeSegmentCount; v++, i += 4)
+        get
         {
-            vertices[i] = vertexA;
-            vertices[i + 1] = vertexA = GetPointOnTorus(0f, v * vStep, 0f);//-PipeSystem.pipeRadChange);
-            vertices[i + 2] = vertexB;
-            vertices[i + 3] = vertexB = GetPointOnTorus(ringDistance / curveSegmentCount, v * vStep, 0f);
-
-            
+            return curveAngle;
         }
-    }*/
+    }
+
+    public float RelativeRotation
+    {
+        get
+        {
+            return relativeRotation;
+        }
+    }
+
+    public float ArcLength
+    {
+        get
+        {
+            return arcLength;
+        }
+    }
 }

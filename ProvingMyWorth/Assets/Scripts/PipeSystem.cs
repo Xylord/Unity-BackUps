@@ -5,134 +5,28 @@ public class PipeSystem : MonoBehaviour {
 
     public Pipe pipePrefab;
 
-    public int pipeCount, maxRadChangeCount, 
-        minPipeRadChange, maxPipeRadChange, 
-        minPipeRadius, maxPipeRadius;
+    public Material pipeMaterial;
+
+    public int pipeCount, seed;
+
+    public float minPipeRadius, maxPipeRadius, 
+        minPipeSteepness, maxPipeSteepness, 
+        minSectionLength, maxSectionLength;
 
     //public bool noRadChange;
     //private float pipeRadius, pipeRadChange = 0f;
 
-    private int pipeRadius, pipeRadChange;
+    //private int pipeRadius, pipeRadChange;
 
     //public float pipeRadiusFactor, radiusChangeFactor;
 
+    private float pipeRadius, pipeDistance, firstPipeLengthOffset,
+        minRadSigmoid, maxRadSigmoid, sigmoidSteepness, offset, sectionLength;
+
+    private int sigmoidSign;
+
     private Pipe[] pipes;
-
-    //public Vector3[] verticesToPassOn;
-
-    void Awake ()
-    {
-        int radChangeCountDown = maxRadChangeCount;
-
-        //pipeRadius = Random.Range(minPipeRadius, maxPipeRadius) * pipeRadiusFactor;
-        pipeRadius = Random.Range(minPipeRadius, maxPipeRadius);
-        pipes = new Pipe[pipeCount];
-
-        //verticesToPassOn = new Vector3[pipePrefab.pipeSegmentCount * 4];
-
-        for ( int i = 0; i < pipes.Length; i++, radChangeCountDown--)
-        {
-            //int temp1 = pipeRadChange, temp2;
-
-            if (radChangeCountDown == 0)
-            {
-                int ranNum = (int)Random.Range(0f, 99f);
-
-                if (ranNum <= 82)
-                    pipeRadChange = Random.Range(minPipeRadChange, maxPipeRadChange + 1);
-                else if (ranNum > 32 && ranNum <= 65)
-                    pipeRadChange = 0;
-                //else print("NoChange");
-
-
-                radChangeCountDown = maxRadChangeCount;
-            }
-
-            /*temp2 = pipeRadChange;
-
-            if (temp1 != temp2 && pipeRadChange == 0)
-                noRadChange = true;
-
-            else
-                noRadChange = false;*/
-
-            Pipe pipe = pipes[i] = pipes[i] = Instantiate<Pipe>(pipePrefab);
-            pipe.transform.SetParent(transform, false);
-            
-            
-            /*if (radChangeCountDown == 1)
-            {
-                pipeRadChange = maxPipeRadChange;
-            }
-
-            if (radChangeCountDown == 0)
-            {
-                pipeRadChange = minPipeRadChange;
-                radChangeCountDown = 2;
-            }*/
-
-            if ( i > 0)
-            {
-                pipe.AlignWith(pipes[i - 1]);
-            }
-        }
-    }
-
-    public Pipe SetupFirstPipe ()
-    {
-        transform.localPosition = new Vector3(0f, -pipes[0].maxCurveRadius);
-        return pipes[0];
-    }
-
-    public void ChangePipeRadius ()
-    {
-        if ((pipeRadius + pipeRadChange >= minPipeRadius
-            && pipeRadChange < 0) 
-            || (pipeRadius + pipeRadChange <= maxPipeRadius && pipeRadChange > 0))//pipeRadius + pipeRadChange >= minPipeRadius && pipeRadius + pipeRadChange <= maxPipeRadius)
-        {
-            pipeRadius += pipeRadChange;
-        }
-        else if (pipeRadius + pipeRadChange <= minPipeRadius)
-        {
-            pipeRadius = minPipeRadius;
-        }
-        else if (pipeRadius + pipeRadChange >= maxPipeRadius)
-        {
-            pipeRadius = maxPipeRadius;
-        }
-    }
-
-    public int PipeRadius
-    {
-        get
-        {
-            return pipeRadius;
-        }
-    }
-
-    public void SetPipeRadius(int radius)
-    {
-            pipeRadius = radius;
-    }
-
-    public int PipeRadChange
-    {
-        get
-        {
-            return pipeRadChange;
-        }
-    }
-
-    /*public void VerticesToPassOn(int i, Vector3 vertex)
-    {
-        verticesToPassOn[i] = vertex;
-    }
-
-    public Vector3 GetVerticesToPassOn(int i)
-    {
-        return verticesToPassOn[i];
-    }*/
-
+    
     // Use this for initialization
     void Start () {
 	
@@ -140,6 +34,135 @@ public class PipeSystem : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
+        //print(pipeRadius);
 	}
+
+    void Awake ()
+    {
+        //Random.seed = seed;
+
+        pipeRadius = Random.Range(minPipeRadius, maxPipeRadius);
+        pipes = new Pipe[pipeCount];
+
+        for ( int i = 0; i < pipes.Length; i++)
+        {
+            Pipe pipe = pipes[i] = pipes[i] = Instantiate<Pipe>(pipePrefab);
+            pipe.transform.SetParent(transform, false);
+            pipe.Generate();
+
+            if (i > 0)
+            {
+                pipe.AlignWith(pipes[i - 1]);
+            }
+        }
+
+        firstPipeLengthOffset = pipes[0].ArcLength;
+
+        AlignNextPipeWithOrigin();
+    }
+
+    void ShiftPipes ()
+    {
+        Pipe temp = pipes[0];
+        for (int i = 1; i < pipes.Length; i++)
+        {
+            pipes[i - 1] = pipes[i];
+        }
+        pipes[pipes.Length - 1] = temp;
+    }
+
+    void AlignNextPipeWithOrigin ()
+    {
+        Transform transformToAlign = pipes[1].transform;
+        for (int i = 0; i < pipes.Length; i++)
+        {
+            if (i != 1)
+            {
+                pipes[i].transform.SetParent(transformToAlign);
+            }
+        }
+
+        transformToAlign.localPosition = Vector3.zero;
+        transformToAlign.localRotation = Quaternion.identity;
+
+        for (int i = 0; i < pipes.Length; i++)
+        {
+            if (i != 1)
+            {
+                pipes[i].transform.SetParent(transform);
+            }
+        }
+    }
+
+    public Pipe SetupFirstPipe ()
+    {
+        transform.localPosition = new Vector3(0f, -pipes[1].CurveRadius);
+        return pipes[1];
+    }
+
+    public Pipe SetupNextPipe()
+    {
+        ShiftPipes();
+        AlignNextPipeWithOrigin();
+        pipes[pipes.Length - 1].Generate();
+        pipes[pipes.Length - 1].AlignWith(pipes[pipes.Length - 2]);
+        transform.localPosition = new Vector3(0f, -pipes[1].CurveRadius);
+
+        return pipes[1];
+    }
+
+    public float CalculatePipeRadius (float distance)
+    {
+        float radius;
+        radius = 10f + 7.5f * Mathf.Sin(distance / 500f);
+
+        return radius;
+    }
+
+    public float PipeRadius
+    {
+        get
+        {
+            return pipeRadius;
+        }
+    }
+
+    public void SetPipeRadius (float value)
+    {
+        pipeRadius = value;
+    }
+
+    public float PipeDistance
+    {
+        get
+        {
+            return pipeDistance;
+        }
+    }
+
+    public float FirstPipeLengthOffset
+    {
+        get
+        {
+            return firstPipeLengthOffset;
+        }
+    }
+
+    public void SetPipeDistance(float value)
+    {
+        pipeDistance = value;
+    }
+
+    /*public void SetPipeRadChange (int value)
+    {
+        pipeRadChange = value;
+    } 
+
+    public int PipeRadChange
+    {
+        get
+        {
+            return pipeRadChange;
+        }
+    }*/
 }

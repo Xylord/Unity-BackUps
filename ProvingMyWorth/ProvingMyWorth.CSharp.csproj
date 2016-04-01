@@ -67,6 +67,7 @@
     <Compile Include="Assets\Scripts\Pipe.cs" />
     <Compile Include="Assets\Scripts\PipeSystem.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
+    <Compile Include="Assets\Scripts\RandomTest.cs" />
     <Compile Include="Assets\Scripts\VaryPipeRadius.cs" />
     <Compile Include="Assets\Scripts\VaryPipeSys.cs" />
   </ItemGroup>
