@@ -114,7 +114,7 @@ public class PipeSystem : MonoBehaviour {
     public float CalculatePipeRadius (float distance)
     {
         float radius;
-        radius = 10f + 7.5f * Mathf.Sin(distance / 500f);
+        radius = 100f + 75f * Mathf.Sin(distance / 3000f);
 
         return radius;
     }

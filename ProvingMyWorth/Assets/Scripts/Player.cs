@@ -21,7 +21,7 @@ public class Player : MonoBehaviour {
         print(Random.seed);
 
         world = pipeSystem.transform.parent;
-        distanceTraveled = pipeSystem.FirstPipeLengthOffset;
+        distanceTraveled = 0f;
         rotater = transform.GetChild(0);
         avatar = rotater.transform.GetChild(0);
         currentPipe = pipeSystem.SetupFirstPipe();
@@ -46,7 +46,7 @@ public class Player : MonoBehaviour {
 
         pipeSystem.transform.localRotation = Quaternion.Euler(0f, 0f, systemRotation);
 
-        radiusFromPlayer = pipeSystem.CalculatePipeRadius(distanceTraveled);
+        radiusFromPlayer = pipeSystem.CalculatePipeRadius(distanceTraveled + pipeSystem.FirstPipeLengthOffset);
         UpdateAvatarLocation();
 	}
 
@@ -69,7 +69,7 @@ public class Player : MonoBehaviour {
     {
         avatarRotation += Input.GetAxis("Horizontal") * rotationVelocity *
             Time.deltaTime * pipeSystem.minPipeRadius / radiusFromPlayer;
-
+        print(avatarRotation + " " + pipeSystem.minPipeRadius);
         if (avatarRotation < 0f)
         {
             avatarRotation += 360f;
@@ -80,7 +80,7 @@ public class Player : MonoBehaviour {
         }
         rotater.localRotation = Quaternion.Euler(avatarRotation, 0f, 0f);
         //UpdatePipeRadius();
-        avatar.localPosition = new Vector3(0, -radiusFromPlayer + offsetFromPipe, 0);
+        avatar.localPosition = new Vector3(0, -radiusFromPlayer, 0);
     }
 
     void UpdatePipeRadius()

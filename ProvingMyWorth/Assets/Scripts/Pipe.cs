@@ -118,6 +118,10 @@ public class Pipe : MonoBehaviour {
         }
         pipeSystem.SetPipeDistance(pipeSystem.PipeDistance + deltaDistance);
         pipeSystem.SetPipeRadius(pipeSystem.CalculatePipeRadius(pipeSystem.PipeDistance));
+        if (lastQuad)
+        {
+            lastQuadRadius = pipeSystem.PipeRadius;
+        }
     }
 
     void CreateFirstQuadRing(float u)
@@ -157,12 +161,6 @@ public class Pipe : MonoBehaviour {
         p.x = r * Mathf.Sin(u);
         p.y = r * Mathf.Cos(u);
         p.z = pipeRadius * Mathf.Sin(v);
-
-        if (lastQuad)
-        {
-            lastQuadRadius = pipeRadius;
-            //print("last " + lastQuadRadius);
-        }
 
         return p;
     }
