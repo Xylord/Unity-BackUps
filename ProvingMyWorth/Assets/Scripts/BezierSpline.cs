@@ -30,14 +30,23 @@ public class BezierSpline : MonoBehaviour
     [SerializeField]
     private bool loop;
 
+    float pos = 24000f;
+
+    void Update()
+    {
+        pos += 10f;
+        if (pos > splineLength) pos = 24000f;
+        //print(GetTForPosition(pos) + " " + pos + " " + splineLength);
+    }
+
     public void Reset()
     {
         points = new Vector3[]
         {
-            new Vector3(1f, 0f, 0f),
-            new Vector3(2f, 0f, 0f),
-            new Vector3(3f, 0f, 0f),
-            new Vector3(4f, 0f, 0f)
+            new Vector3(0f, 0f, 0f),
+            new Vector3(50f, 0f, 0f),
+            new Vector3(100f, 0f, 0f),
+            new Vector3(150f, 0f, 0f)
         };
 
         modes = new BezierControlPointMode[]
@@ -55,14 +64,14 @@ public class BezierSpline : MonoBehaviour
         splineLength = 3f;
     }
 
-    void Start()
+    void Awake()
     {
         points = new Vector3[]
         {
-            new Vector3(1f, 0f, 0f),
-            new Vector3(2f, 0f, 0f),
-            new Vector3(3f, 0f, 0f),
-            new Vector3(4f, 0f, 0f)
+            new Vector3(0f, 0f, 0f),
+            new Vector3(500f, 0f, 0f),
+            new Vector3(1000f, 0f, 0f),
+            new Vector3(1500f, 0f, 0f)
         };
 
         modes = new BezierControlPointMode[]
@@ -86,7 +95,10 @@ public class BezierSpline : MonoBehaviour
     {
         for (int i = 0; i < curveNumber - 1; i++)
         {
-            if (i == curveNumber - 2) Loop = true;
+            if (i == curveNumber - 2)
+            {
+                Loop = true;
+            }
             AddCurve();
         }
     }
@@ -106,6 +118,11 @@ public class BezierSpline : MonoBehaviour
                 SetControlPoint(0, points[0]);
             }
         }
+    }
+
+    void Start()
+    {
+
     }
 
     public Vector3 GetPoint(float t)
@@ -186,20 +203,23 @@ public class BezierSpline : MonoBehaviour
 
         distanceLUT = new float[2, velocityAccuracy * CurveCount];
 
-        float deltaT = 1f / (distanceLUT.Length / 2f), t = 0f;
+        float deltaT = 1f / ((distanceLUT.Length / 2) - 1), t = 0f;
         splineLength = 0f;
 
         distanceLUT[0, 0] = t;
         distanceLUT[1, 0] = 0f;
         t += deltaT;
+        splineLength += (GetPoint(t) - GetPoint(t - deltaT)).magnitude;
 
-        for (int i = 1; i < distanceLUT.Length / 2; i++, t += deltaT)
+        for (int i = 1; i < distanceLUT.Length / 2; i++, t += deltaT, splineLength += (GetPoint(t) - GetPoint(t - deltaT)).magnitude)
         {
-            splineLength += (GetPoint(t) - GetPoint(t - deltaT)).magnitude;
+            //splineLength += (GetPoint(t) - GetPoint(t - deltaT)).magnitude;
 
             distanceLUT[0, i] = t;
             distanceLUT[1, i] = splineLength;
         }
+
+        //print(t + "jiewohfewquinjif");
     }
 
     public float GetTForPosition(float progress)
@@ -224,7 +244,7 @@ public class BezierSpline : MonoBehaviour
                 return T;
             }
         }
-        print("OUPS");
+        //print("OUPS");
         return 0f;
         
     }
@@ -425,24 +445,21 @@ public class BezierSpline : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        float steps = 10;
-        Vector3 velocity, pointMovement;
-        for (int v = 0; v < steps; v++)
+        float progress = 0f;
+
+        /*Vector3 point = GetPoint(GetTForPosition(splineLength - 10f));
+        print(GetTForPosition(splineLength - 10f));
+        Gizmos.DrawSphere(point, 5f);*/
+
+        /*while (progress < splineLength)
         {
-            
-            
 
-            Vector3 point = points[points.Length - 2];
-            Gizmos.DrawSphere(point, 1f);
-            point = points[points.Length - 1];
-            Gizmos.DrawSphere(point, 1f);
-            velocity = point - points[points.Length - 2];
-            velocity.Normalize();
-            pointMovement = RandomPointInSphereExceptCone(140f, 10f, 10f, velocity);
-            point += pointMovement;
-            Gizmos.color = Color.red * (point.x + 20f) / 40f;
-            Gizmos.DrawSphere(point, 0.1f);
+            Vector3 point = GetPoint(GetTForPosition(progress));
+            //print(GetTForPosition(progress));
+            Gizmos.DrawSphere(point, 5f);
 
-        }
+            progress += 35;
+
+        }*/
     }
 }

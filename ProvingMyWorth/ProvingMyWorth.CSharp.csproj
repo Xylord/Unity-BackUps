@@ -65,17 +65,23 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Bezier.cs" />
     <Compile Include="Assets\Scripts\BezierSpline.cs" />
-    <Compile Include="Assets\Scripts\Pipe.cs" />
-    <Compile Include="Assets\Scripts\PipeSystem.cs" />
-    <Compile Include="Assets\Scripts\Player.cs" />
+    <Compile Include="Assets\Scripts\PlayerShip.cs" />
+    <Compile Include="Assets\Scripts\SplinePipe.cs" />
+    <Compile Include="Assets\Scripts\SplinePipeSystem.cs" />
     <Compile Include="Assets\Scripts\SplineWalker.cs" />
     <Compile Include="Assets\Scripts\Testing\BezierCurve.cs" />
     <Compile Include="Assets\Scripts\Testing\Fractal.cs" />
     <Compile Include="Assets\Scripts\Testing\Line.cs" />
+    <Compile Include="Assets\Scripts\Testing\Pipe.cs" />
+    <Compile Include="Assets\Scripts\Testing\PipeSystem.cs" />
+    <Compile Include="Assets\Scripts\Testing\Player.cs" />
     <Compile Include="Assets\Scripts\Testing\RandomTest.cs" />
     <Compile Include="Assets\Scripts\Testing\SphereTest.cs" />
     <Compile Include="Assets\Scripts\Testing\VaryPipeRadius.cs" />
     <Compile Include="Assets\Scripts\Testing\VaryPipeSys.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Materials\NewSurfaceShader.shader" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>
