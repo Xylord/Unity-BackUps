@@ -28,7 +28,7 @@ public class SplinePipeSystem : MonoBehaviour {
         {
             float offset;
 
-            SplinePipe pipe = pipes[i] = pipes[i] = Instantiate<SplinePipe>(pipePrefab);
+            SplinePipe pipe = pipes[i] = Instantiate<SplinePipe>(pipePrefab);
             pipe.transform.SetParent(transform, false);
             pipePosition = i * (curveSegmentCount - 1) * ringDistance;
 
@@ -57,7 +57,7 @@ public class SplinePipeSystem : MonoBehaviour {
 
     public SplinePipe SetupNextPipe()
     {
-        float pipePosition, offset;
+        float pipePosition;
         pipePosition = generatedPipes * (curveSegmentCount - 1) * ringDistance;
 
         if (pipePosition > spline.SplineLength)
@@ -80,19 +80,19 @@ public class SplinePipeSystem : MonoBehaviour {
 
     void GenerateRadiusCurve()
     {
-        Keyframe[] keyFrames = new Keyframe[32];
+        Keyframe[] keyFrames = new Keyframe[5];
 
         keyFrames[0].time = 0f;
         keyFrames[0].value = 0.5f;
-        keyFrames[31].time = spline.SplineLength;
-        keyFrames[31].value = 0.5f;
+        keyFrames[4].time = spline.SplineLength;
+        keyFrames[4].value = 0.5f;
 
         float delta = spline.SplineLength / keyFrames.Length;
 
         for (int i = 1; i < keyFrames.Length - 1; i++)
         {
             keyFrames[i].time = i * delta;
-            keyFrames[i].value = Random.Range(0.5f, 0.5f);
+            keyFrames[i].value = Random.Range(0.1f, 1.25f);
         }
 
         radiusCurve.postWrapMode = WrapMode.Clamp;

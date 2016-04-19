@@ -184,7 +184,13 @@ public class BezierSpline : MonoBehaviour
             pointMovement = RandomPointInSphereExceptCone(coneAngle, minSphereRadius, maxSphereRadius, velocity);//coneAngle, minSphereRadius, maxSphereRadius, velocity);
             point += pointMovement;
 
-            if (point.magnitude > levelSize) point = Vector3.ClampMagnitude(point, levelSize);
+            //if (point.magnitude > levelSize) point = Vector3.ClampMagnitude(point, levelSize);
+            while (point.magnitude > levelSize)
+            {
+                point -= pointMovement;
+                pointMovement = RandomPointInSphereExceptCone(coneAngle, minSphereRadius, maxSphereRadius, velocity);
+                point += pointMovement;
+            }
             
             thisCurve[thisCurve.Length - (i - 3)] = point;
             points[points.Length - (i - 3)] = point;

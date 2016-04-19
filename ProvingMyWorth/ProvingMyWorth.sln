@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2015
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProvingMyWorth.CSharp.Plugins", "ProvingMyWorth.CSharp.Plugins.csproj", "{8A5F22AF-1153-5D06-7D7E-86FCFA8E36C4}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProvingMyWorth.CSharp", "ProvingMyWorth.CSharp.csproj", "{58211E58-E947-833F-62F6-BB31BCAD45A0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProvingMyWorth.CSharp.Editor", "ProvingMyWorth.CSharp.Editor.csproj", "{692966A5-F8F2-0D5B-98A5-C5BEB489B412}"
@@ -11,6 +13,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8A5F22AF-1153-5D06-7D7E-86FCFA8E36C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A5F22AF-1153-5D06-7D7E-86FCFA8E36C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A5F22AF-1153-5D06-7D7E-86FCFA8E36C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A5F22AF-1153-5D06-7D7E-86FCFA8E36C4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{58211E58-E947-833F-62F6-BB31BCAD45A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{58211E58-E947-833F-62F6-BB31BCAD45A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58211E58-E947-833F-62F6-BB31BCAD45A0}.Release|Any CPU.ActiveCfg = Release|Any CPU

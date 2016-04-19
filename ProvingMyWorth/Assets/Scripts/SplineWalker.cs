@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class SplineWalker : MonoBehaviour{
+public class SplineWalker : PipeObject{
 
-    public float speed;
-    public BezierSpline spline;
-    public SplinePipeSystem pipeSystem;
-    public float progress, shipRadius, lateralSpeed, avatarRotation;
+    public float minSpeed, speed;
+    public float progress, shipRadius, 
+        lateralSpeed, avatarRotation, 
+        offsetFromGrid, maxLateralSpeed, spawnpoint;
     public Transform rotater, avatar;
     public bool lookForward;
 
@@ -21,22 +21,35 @@ public class SplineWalker : MonoBehaviour{
         rotater = transform.GetChild(0);
         avatar = rotater.transform.GetChild(0);
 
-        progress = pipeSystem.PlayerStart;
+        progress = spawnpoint;
         lookForward = true;
-        speed = 300f;
     }
 	
 	// Update is called once per frame
 	void Update () {
+        CheckForLooping();
         UpdateAvatarLocation(0f);
 	}
+
+    public bool CheckForLooping()
+    {
+        if (progress > spline.SplineLength)
+        {
+            progress = 0f;
+            return true;
+        }
+        return false;
+    }
 
     public void UpdateAvatarLocation(float lateralMovement)
     {
         progress += Time.deltaTime * speed;
         shipRadius = pipeSystem.GetRadius(progress);
+        lateralSpeed += lateralMovement;
 
-        avatarRotation += lateralMovement *
+        Mathf.Clamp(lateralSpeed, -maxLateralSpeed, maxLateralSpeed);
+
+        avatarRotation += lateralSpeed *
             Time.deltaTime * pipeSystem.RadiusScale / shipRadius;
 
         if (avatarRotation < 0f)
@@ -52,40 +65,33 @@ public class SplineWalker : MonoBehaviour{
             inRadius = shipRadius * Mathf.Cos(Mathf.PI / pipeSystem.RadiusSegmentCount);
         bool even = false;
 
-        print(lerpTemp);
-
         if ((int)lerpTemp % 2 == 0)
         {
             while(lerpTemp > 1f)
             {
                 lerpTemp--;
-                even = true;
             }
+            even = true;
         }
         else if ((int)lerpTemp % 2 == 1)
         {
             while (lerpTemp > 1f)
             {
                 lerpTemp--;
-                even = false;
             }
+            even = false;
         }
 
+        if (even)
+            lerpTemp = 1f - lerpTemp;
+
         lerpTemp *= lerpTemp;
-
-        shipRadius = even ? Mathf.Lerp(inRadius, shipRadius, 1f - lerpTemp) : Mathf.Lerp(inRadius, shipRadius, lerpTemp);
-
-        print(even);
+        shipRadius = Mathf.Lerp(inRadius, shipRadius, lerpTemp) - offsetFromGrid;
 
         rotater.localRotation = Quaternion.Euler(0f, 0f, avatarRotation);
         avatar.localPosition = new Vector3(0, -shipRadius, 0);
 
         float T = spline.GetTForPosition(progress);
-
-        if (progress > spline.SplineLength)
-        {
-            progress = 0f;
-        }
 
         Vector3 position = spline.GetPoint(T);
         transform.localPosition = position;

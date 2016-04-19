@@ -10,7 +10,11 @@ public class SplinePipe : MonoBehaviour {
 
     private Mesh mesh;
 
+    //public PipeObstacle spikePrefab;
+    //public Vector3[,] spikeVertices;
+    //private PipeObstacle[] spikes;
     private Vector3[] vertices;
+    private Vector2[] uvs;
     private int[] triangles;
     private float startPosition;
 
@@ -31,6 +35,14 @@ public class SplinePipe : MonoBehaviour {
         pipeSystem = mainPipeSystem.GetComponent<SplinePipeSystem>();
 
         GetComponent<MeshRenderer>().material = pipeSystem.material;
+
+        /*spikes = new PipeObstacle[30];
+        for (int i = 0; i < spikes.Length; i++)
+        {
+            PipeObstacle spike = spikes[i] = spikes[i] = Instantiate<PipeObstacle>(spikePrefab);
+            
+            spike.transform.SetParent(transform, false);
+        }*/
     }
 
     public void Generate(float initialPosition)
@@ -39,15 +51,27 @@ public class SplinePipe : MonoBehaviour {
 
         mesh.Clear();
         SetVertices();
+        SetUVs();
         SetTriangles();
         mesh.RecalculateNormals();
 
+        //GenerateObstacles();
     }
 	
 	// Update is called once per frame
 	void Update () {
 	
 	}
+
+    /*void GenerateObstacles()
+    {
+        for(int i = 0; i < spikes.Length; i++)
+        {
+            SplinePipe thispipe = transform.GetComponentInParent<SplinePipe>();
+            spikes[i].Generate(transform.GetComponentInParent<SplinePipe>(), i);
+        }
+        
+    }*/
 
     void SetVertices()
     {
@@ -73,15 +97,34 @@ public class SplinePipe : MonoBehaviour {
 
     void SetTriangles()
     {
+        //int spikeIndex = 0;
+        //spikeVertices = new Vector3[4, spikes.Length];
         triangles = new int[pipeSystem.RadiusSegmentCount * pipeSystem.CurveSegmentCount * 6];
+
         for (int t = 0, i = 0; t < triangles.Length; t += 6, i += 4)
         {
+            
+
             triangles[t] = i;
             triangles[t + 1] = triangles[t + 4] = i + 2;
             triangles[t + 2] = triangles[t + 3] = i + 1;
             triangles[t + 5] = i + 3;
         }
+        
         mesh.triangles = triangles;
+    }
+
+    void SetUVs()
+    {
+        uvs = new Vector2[vertices.Length];
+        for (int i = 0; i < vertices.Length; i += 4)
+        {
+            uvs[i] = Vector2.zero;
+            uvs[i + 1] = Vector2.right;
+            uvs[i + 2] = Vector2.up;
+            uvs[i + 3] = Vector2.one;
+        }
+        mesh.uv = uvs;
     }
 
     void CreateFirstQuadRing (float position, float vStep)

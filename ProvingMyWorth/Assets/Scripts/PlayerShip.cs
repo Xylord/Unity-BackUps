@@ -3,6 +3,7 @@ using System.Collections;
 
 public class PlayerShip : SplineWalker{
 
+    public float acceleration, slowdownFactor;
     private float pipePathLengthHalf;
     private SplinePipe currentPipe;
     private int traveledPipes;
@@ -19,13 +20,14 @@ public class PlayerShip : SplineWalker{
         rotater = transform.GetChild(0);
         avatar = rotater.transform.GetChild(0);
 
-        progress = pipeSystem.PlayerStart;
+        spawnpoint = pipeSystem.PlayerStart;
+        progress = spawnpoint;
         currentPipe = pipeSystem.FirstPipe();
         traveledPipes = 0;
         pipePathLengthHalf = ((float)pipeSystem.pipeCount / 2f) * pipeSystem.RingDistance * pipeSystem.CurveSegmentCount;
         justLooped = false;
         lookForward = true;
-        speed = 300f;
+        speed = minSpeed;
     }
 	
 	// Update is called once per frame
@@ -35,20 +37,35 @@ public class PlayerShip : SplineWalker{
         input = Input.GetAxis("Mouse X");
 
         UpdateAvatarLocation(input);
+        CalculateSpeed();
         UpdatePipes();
 	}
 
+    void CalculateSpeed()
+    {
+        speed = speed + (acceleration - Mathf.Abs(lateralSpeed) * slowdownFactor) * Time.deltaTime;
+        if (speed < minSpeed) speed = minSpeed;
+    }
+
     void UpdatePipes()
     {
-        if (progress > spline.SplineLength)
+        if (CheckForLooping())
         {
-            progress = 0f;
             justLooped = true;
+            print("justlooped " + spline.SplineLength);
+
         }
+
+        //print(traveledPipes);
+
+        
 
         if (progress - currentPipe.StartPosition > pipePathLengthHalf || (spline.SplineLength - currentPipe.StartPosition + progress > pipePathLengthHalf && justLooped))
         {
+
+            print(currentPipe.name);
             currentPipe = pipeSystem.SetupNextPipe();
+            print(currentPipe.name);
             traveledPipes++;
 
             if (progress > currentPipe.StartPosition)
