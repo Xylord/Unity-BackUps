@@ -3,7 +3,7 @@ using System.Collections;
 
 public class PlayerShip : SplineWalker{
 
-    public float acceleration, slowdownFactor;
+    public float baseAcceleration, slowdownFactor, maxSlowdown;
     private float pipePathLengthHalf;
     private SplinePipe currentPipe;
     private int traveledPipes;
@@ -35,15 +35,17 @@ public class PlayerShip : SplineWalker{
         float input;
 
         input = Input.GetAxis("Mouse X");
-
-        UpdateAvatarLocation(input);
         CalculateSpeed();
+        UpdateAvatarRotation(input);
+        UpdateAvatarLocation();
         UpdatePipes();
 	}
 
     void CalculateSpeed()
     {
-        speed = speed + (acceleration - Mathf.Abs(lateralSpeed) * slowdownFactor) * Time.deltaTime;
+        acceleration = baseAcceleration * Time.deltaTime / (speed / minSpeed) - Mathf.Clamp(lateralSpeed * lateralSpeed * slowdownFactor, 0f, maxSlowdown);
+
+        speed += acceleration * Time.deltaTime;
         if (speed < minSpeed) speed = minSpeed;
     }
 
@@ -52,20 +54,12 @@ public class PlayerShip : SplineWalker{
         if (CheckForLooping())
         {
             justLooped = true;
-            print("justlooped " + spline.SplineLength);
 
         }
 
-        //print(traveledPipes);
-
-        
-
         if (progress - currentPipe.StartPosition > pipePathLengthHalf || (spline.SplineLength - currentPipe.StartPosition + progress > pipePathLengthHalf && justLooped))
         {
-
-            print(currentPipe.name);
             currentPipe = pipeSystem.SetupNextPipe();
-            print(currentPipe.name);
             traveledPipes++;
 
             if (progress > currentPipe.StartPosition)

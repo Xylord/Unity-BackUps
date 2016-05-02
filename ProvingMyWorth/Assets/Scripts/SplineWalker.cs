@@ -3,7 +3,7 @@ using System.Collections;
 
 public class SplineWalker : PipeObject{
 
-    public float minSpeed, speed;
+    public float minSpeed, speed, acceleration;
     public float progress, shipRadius, 
         lateralSpeed, avatarRotation, 
         offsetFromGrid, maxLateralSpeed, spawnpoint;
@@ -28,7 +28,8 @@ public class SplineWalker : PipeObject{
 	// Update is called once per frame
 	void Update () {
         CheckForLooping();
-        UpdateAvatarLocation(0f);
+        UpdateAvatarRotation(0f);
+        UpdateAvatarLocation();
 	}
 
     public bool CheckForLooping()
@@ -41,9 +42,8 @@ public class SplineWalker : PipeObject{
         return false;
     }
 
-    public void UpdateAvatarLocation(float lateralMovement)
+    virtual public void UpdateAvatarRotation(float lateralMovement)
     {
-        progress += Time.deltaTime * speed;
         shipRadius = pipeSystem.GetRadius(progress);
         lateralSpeed += lateralMovement;
 
@@ -60,6 +60,13 @@ public class SplineWalker : PipeObject{
         {
             avatarRotation -= 360f;
         }
+
+        rotater.localRotation = Quaternion.Euler(0f, 0f, avatarRotation);
+    }
+
+    public void UpdateAvatarLocation()
+    {
+        progress += Time.deltaTime * speed;
 
         float lerpTemp = avatarRotation / (360f / (2f * pipeSystem.RadiusSegmentCount)),
             inRadius = shipRadius * Mathf.Cos(Mathf.PI / pipeSystem.RadiusSegmentCount);
@@ -88,7 +95,6 @@ public class SplineWalker : PipeObject{
         lerpTemp *= lerpTemp;
         shipRadius = Mathf.Lerp(inRadius, shipRadius, lerpTemp) - offsetFromGrid;
 
-        rotater.localRotation = Quaternion.Euler(0f, 0f, avatarRotation);
         avatar.localPosition = new Vector3(0, -shipRadius, 0);
 
         float T = spline.GetTForPosition(progress);
@@ -99,6 +105,22 @@ public class SplineWalker : PipeObject{
         if (lookForward)
         {
             transform.LookAt(position + spline.GetDirection(T));
+        }
+    }
+
+    public float AvatarRotation
+    {
+        get
+        {
+            return avatarRotation;
+        }
+    }
+
+    public float Progress
+    {
+        get
+        {
+            return progress;
         }
     }
 }

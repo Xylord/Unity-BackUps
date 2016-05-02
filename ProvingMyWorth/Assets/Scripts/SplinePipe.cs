@@ -10,9 +10,12 @@ public class SplinePipe : MonoBehaviour {
 
     private Mesh mesh;
 
-    //public PipeObstacle spikePrefab;
-    //public Vector3[,] spikeVertices;
-    //private PipeObstacle[] spikes;
+    public int spikeDensity;
+    public float minSpikeHeight, maxSpikeHeight;
+    public PipeObstacle spikePrefab;
+    public Vector3[,] spikeVertices;
+    private PipeObstacle[] spikes;
+    private Quaternion goodToUp;
     private Vector3[] vertices;
     private Vector2[] uvs;
     private int[] triangles;
@@ -36,13 +39,13 @@ public class SplinePipe : MonoBehaviour {
 
         GetComponent<MeshRenderer>().material = pipeSystem.material;
 
-        /*spikes = new PipeObstacle[30];
+        spikes = new PipeObstacle[spikeDensity];
         for (int i = 0; i < spikes.Length; i++)
         {
-            PipeObstacle spike = spikes[i] = spikes[i] = Instantiate<PipeObstacle>(spikePrefab);
-            
+            PipeObstacle spike = spikes[i] = Instantiate<PipeObstacle>(spikePrefab);
+            spike.SetPipe(this);
             spike.transform.SetParent(transform, false);
-        }*/
+        }
     }
 
     public void Generate(float initialPosition)
@@ -55,7 +58,7 @@ public class SplinePipe : MonoBehaviour {
         SetTriangles();
         mesh.RecalculateNormals();
 
-        //GenerateObstacles();
+        GenerateObstacles();
     }
 	
 	// Update is called once per frame
@@ -63,15 +66,38 @@ public class SplinePipe : MonoBehaviour {
 	
 	}
 
-    /*void GenerateObstacles()
+    void GenerateObstacles()
     {
+        int quadNumber = pipeSystem.RadiusSegmentCount * pipeSystem.CurveSegmentCount;
+        spikeVertices = new Vector3[5, spikes.Length];
+        for (int i = 0; i < spikes.Length; i++)
+        {
+            int spikedQuad = Random.Range(0, quadNumber);
+            spikeVertices[0, i] = vertices[spikedQuad * 4];
+            spikeVertices[1, i] = vertices[spikedQuad * 4 + 1];
+            spikeVertices[2, i] = vertices[spikedQuad * 4 + 2];
+            spikeVertices[3, i] = vertices[spikedQuad * 4 + 3];
+
+            Vector3 norm, center = Vector3.zero;
+
+            norm = Vector3.Cross((spikeVertices[1, i] - spikeVertices[0, i]), (spikeVertices[2, i] - spikeVertices[0, i])).normalized;
+
+            for (int j = 0; j < 4; j++)
+            {
+                center += spikeVertices[j, i];
+            }
+
+            center /= 4f;
+
+            spikeVertices[4, i] = center - norm * Random.Range(minSpikeHeight, maxSpikeHeight);
+        }
+
         for(int i = 0; i < spikes.Length; i++)
         {
-            SplinePipe thispipe = transform.GetComponentInParent<SplinePipe>();
-            spikes[i].Generate(transform.GetComponentInParent<SplinePipe>(), i);
+            spikes[i].Generate(i);
         }
         
-    }*/
+    }
 
     void SetVertices()
     {
@@ -103,8 +129,6 @@ public class SplinePipe : MonoBehaviour {
 
         for (int t = 0, i = 0; t < triangles.Length; t += 6, i += 4)
         {
-            
-
             triangles[t] = i;
             triangles[t + 1] = triangles[t + 4] = i + 2;
             triangles[t + 2] = triangles[t + 3] = i + 1;
@@ -162,6 +186,7 @@ public class SplinePipe : MonoBehaviour {
             vertices[i + 2] = vertexB;
             vertices[i + 3] = vertexB = pointB + secondUp * radiusB;
         }
+        goodToUp = toUp2;
         position += pipeSystem.RingDistance;
     }
 
@@ -175,8 +200,12 @@ public class SplinePipe : MonoBehaviour {
         Vector3 secondCircle = pipeSystem.spline.GetDirection(t2);
 
         //toUp1 = Quaternion.AngleAxis(90f, Vector3.Cross(firstCircle, Vector3.up));
-        Quaternion toUp2 = Quaternion.AngleAxis(90f, Vector3.Cross(secondCircle, Vector3.up)),
-        bRot = Quaternion.AngleAxis(vStep, secondCircle);
+        Quaternion toUp2, bRot = Quaternion.AngleAxis(vStep, secondCircle);
+
+        if (Vector3.Angle(secondCircle, Vector3.up) < 0.01f)
+            toUp2 = goodToUp;
+        else
+            toUp2 = Quaternion.AngleAxis(90f, Vector3.Cross(secondCircle, Vector3.up));
 
         // firstUp = toUp1 * firstCircle;
         Vector3 secondUp = toUp2 * secondCircle,
@@ -207,13 +236,22 @@ public class SplinePipe : MonoBehaviour {
 
     void OnDrawGizmos()
     {
-        Gizmos.color = Color.red;
+        Gizmos.color = Color.green;
 
         //Gizmos.DrawSphere(vertices[4 * pipeSystem.RadiusSegmentCount + 4], 1f);
 
-        /*for(int i = 0; i < testGIZMOS.Length; i++)
+        /*for(int i = 0; i < spikeVertices.Length / 4; i++)
         {
-        Gizmos.DrawSphere(testGIZMOS[i], 1f);
+            Gizmos.DrawSphere(spikeVertices[0, i], 2f);
+            Gizmos.color = Color.blue;
+            Gizmos.DrawSphere(spikeVertices[1, i], 2f);
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(spikeVertices[2, i], 2f);
+            Gizmos.color = Color.gray;
+            Gizmos.DrawSphere(spikeVertices[3, i], 2f);
+            Gizmos.color = Color.black;
+            Gizmos.DrawSphere(spikeVertices[4, i], 2f);
+            Gizmos.color = Color.green;
         }*/
 
         /*Gizmos.color = Color.red;

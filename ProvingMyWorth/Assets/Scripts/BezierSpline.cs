@@ -178,23 +178,50 @@ public class BezierSpline : MonoBehaviour
         thisCurve[0] = point;
         Array.Resize(ref points, points.Length + 3);
 
-        for(int i = 6; i > 3; i--)
-        {
-            velocity = point - points[points.Length - i];
-            pointMovement = RandomPointInSphereExceptCone(coneAngle, minSphereRadius, maxSphereRadius, velocity);//coneAngle, minSphereRadius, maxSphereRadius, velocity);
-            point += pointMovement;
+        //float tDelta = 1f / (points.Length / 3), tOnCurve = 1f - tDelta, angle, smallestAngle = 90f;
 
-            //if (point.magnitude > levelSize) point = Vector3.ClampMagnitude(point, levelSize);
-            while (point.magnitude > levelSize)
+
+        //do
+        //{
+            //Vector3 dir;
+
+            for (int i = 6; i > 3; i--)
             {
-                point -= pointMovement;
-                pointMovement = RandomPointInSphereExceptCone(coneAngle, minSphereRadius, maxSphereRadius, velocity);
+                velocity = point - points[points.Length - i];
+                pointMovement = RandomPointInSphereExceptCone(coneAngle, minSphereRadius, maxSphereRadius, velocity);//coneAngle, minSphereRadius, maxSphereRadius, velocity);
                 point += pointMovement;
+
+
+                //if (point.magnitude > levelSize) point = Vector3.ClampMagnitude(point, levelSize);
+                while (point.magnitude > levelSize)
+                {
+                    point -= pointMovement;
+                    pointMovement = RandomPointInSphereExceptCone(coneAngle, minSphereRadius, maxSphereRadius, velocity);
+                    point += pointMovement;
+                }
+
+                thisCurve[thisCurve.Length - (i - 3)] = point;
+                points[points.Length - (i - 3)] = point;
             }
-            
-            thisCurve[thisCurve.Length - (i - 3)] = point;
-            points[points.Length - (i - 3)] = point;
-        }
+
+            /*while (tOnCurve < 1f)
+            {
+                dir = GetDirection(tOnCurve);
+                angle = Vector3.Angle(dir, Vector3.up);
+                if (angle < 90f && angle < smallestAngle)
+                {
+                    smallestAngle = angle;
+                }
+                else if (180f - angle < smallestAngle)
+                {
+                    smallestAngle = 180f - angle;
+                }
+
+                tOnCurve += tDelta / velocityAccuracy;
+            }*/
+        //} while (smallestAngle < 5f);
+
+
 
         Array.Resize(ref modes, modes.Length + 1);
         modes[modes.Length - 1] = modes[modes.Length - 2];
@@ -451,21 +478,22 @@ public class BezierSpline : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        float progress = 0f;
+        float t = 0f;
+        int dots = 0;
 
         /*Vector3 point = GetPoint(GetTForPosition(splineLength - 10f));
         print(GetTForPosition(splineLength - 10f));
         Gizmos.DrawSphere(point, 5f);*/
 
-        /*while (progress < splineLength)
+        /*while (t < 1f)
         {
 
-            Vector3 point = GetPoint(GetTForPosition(progress));
+            Vector3 point = GetPoint(t);
             //print(GetTForPosition(progress));
-            Gizmos.DrawSphere(point, 5f);
+            Gizmos.DrawSphere(point, 20f);
 
-            progress += 35;
-
+            t += 0.05f;
+            dots++;
         }*/
     }
 }

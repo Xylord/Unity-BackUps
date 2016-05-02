@@ -14,6 +14,7 @@ public class PipeObject : MonoBehaviour {
         GameObject curve = GameObject.Find("Curve");
         spline = curve.GetComponent<BezierSpline>();
 
+        
     }
 	
 	// Update is called once per frame
