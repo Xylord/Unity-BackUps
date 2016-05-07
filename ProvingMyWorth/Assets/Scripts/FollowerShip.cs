@@ -4,9 +4,11 @@ using System.Collections;
 public class FollowerShip : SplineWalker {
 
     private PlayerShip player;
+    public Laser gun;
+    public Transform turret;
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start () {
         GameObject mainPipeSystem = GameObject.Find("SplinePipeSystem");
         pipeSystem = mainPipeSystem.GetComponent<SplinePipeSystem>();
 
@@ -18,6 +20,8 @@ public class FollowerShip : SplineWalker {
 
         rotater = transform.GetChild(0);
         avatar = rotater.transform.GetChild(0);
+        gun = avatar.GetChild(1).GetComponent<Laser>();
+        turret = avatar.GetChild(1).transform;
 
         spawnpoint = pipeSystem.PlayerStart - 100f;
         progress = spawnpoint;
