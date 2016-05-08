@@ -15,7 +15,8 @@
 
 		CGPROGRAM
 		// Physically based Standard lighting model, and enable shadows on all light types
-#pragma surface surf Standard fullforwardshadows
+#pragma surface surf Standard vertex:vert fullforwardshadows
+//#pragma surface surf Lambert vertex:vert
 
 
 		// Use shader model 3.0 target, to get nicer looking lighting
@@ -23,30 +24,49 @@
 
 		sampler2D _MainTex;
 		sampler2D _EmissionMap;
+		half _MinVisDistance;
+		half _MaxVisDistance;
+		half _Dist;
+		half _Glossiness;
+		half _Metallic;
+		fixed4 _Color;
 
 	struct Input {
 		float2 uv_MainTex, uv_EmissionMap;
 		float3 viewDir;
-		fixed4 pos : SV_POSITION;
+		//float3 customColor;
+		//fixed4 pos : SV_POSITION;
+		half glossDist;
 	};
 
-	half _Dist;
-	half _Glossiness;
-	half _Metallic;
-	fixed4 _Color;
-	float4 vertex : POSITION;
+	void vert(inout appdata_full v, out Input o) {
+		UNITY_INITIALIZE_OUTPUT(Input, o);
+		//o.customColor = abs(v.normal);
 
-	void surf(Input IN, inout SurfaceOutputStandard o) {
-		float dist = length(mul(_World2Object, float4 (IN.viewDir.xy, IN.viewDir.z + _Dist, 0)));
+		_MinVisDistance = 100;
+		_MaxVisDistance = 200;
+		half3 viewDirW = _WorldSpaceCameraPos - mul((half4x4)_Object2World, v.vertex);
+		half viewDist = length(viewDirW);
+		half falloff = saturate((viewDist - _MinVisDistance) / (_MaxVisDistance - _MinVisDistance));
+		o.glossDist = 1 - falloff;
+	}
+
+	
+	//float4 vertex : POSITION;
+
+	void surf(in Input IN, inout SurfaceOutputStandard o) {
+		//float dist = length(mul(_World2Object, float4 (IN.viewDir.xy, IN.viewDir.z + _Dist, 0)));
 		// Albedo comes from a texture tinted by color
 		//fixed4 distVector = IN.pos;
 		//float3 test = (0, 0, 0);
-		float distVec = distance(_WorldSpaceCameraPos, vertex);
+		//_Color = vertex;
+		//float distVec = distance(_WorldSpaceCameraPos, vertex);
 		fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
 		o.Albedo = c.rgb;
+		//o.Albedo.rgb = lerp(float3(0, 1, 0), float3(1, 0, 0), IN.glossDist);
 		// Metallic and smoothness come from slider variables
 		o.Metallic = _Metallic;
-		o.Smoothness = saturate(_Glossiness * dist);// / distVec * _Dist);//dist);
+		o.Smoothness = saturate(_Glossiness * IN.glossDist);// IN.glossDist);// / distVec * _Dist);//dist);
 		o.Emission = tex2D (_EmissionMap, IN.uv_EmissionMap) * _Color;
 		o.Alpha = c.a;
 	}
