@@ -8,6 +8,7 @@ public class SplineWalker : PipeObject{
         lateralSpeed, avatarRotation, 
         offsetFromGrid, maxLateralSpeed, spawnpoint;
     public Transform rotater, avatar;
+    public Rigidbody rigidBody;
     public bool lookForward;
 
 	// Use this for initialization
@@ -17,6 +18,11 @@ public class SplineWalker : PipeObject{
 
         GameObject curve = GameObject.Find("Curve");
         spline = curve.GetComponent<BezierSpline>();
+
+        if (gameObject.GetComponent<Rigidbody>())
+        {
+            rigidBody = gameObject.GetComponent<Rigidbody>();
+        }
 
         rotater = transform.GetChild(0);
         avatar = rotater.transform.GetChild(0);
@@ -42,8 +48,18 @@ public class SplineWalker : PipeObject{
         return false;
     }
 
+    virtual public void UpdateAvatarAttitude()
+    {
+        if (gameObject.GetComponent<Rigidbody>())
+        {
+            avatar.localRotation = Quaternion.LookRotation(rigidBody.velocity, -avatar.localPosition);
+        }
+    }
+
     virtual public void UpdateAvatarRotation(float lateralMovement)
     {
+        UpdateAvatarAttitude();
+
         shipRadius = pipeSystem.GetRadius(progress);
         lateralSpeed += lateralMovement;
 
@@ -64,17 +80,33 @@ public class SplineWalker : PipeObject{
         rotater.localRotation = Quaternion.Euler(0f, 0f, avatarRotation);
     }
 
-    public void UpdateAvatarLocation()
+    /*public float GetOffsetFromGrid(float progress)
     {
-        progress += Time.deltaTime * speed;
+        float offset = 0;
 
-        float lerpTemp = avatarRotation / (360f / (2f * pipeSystem.RadiusSegmentCount)),
-            inRadius = shipRadius * Mathf.Cos(Mathf.PI / pipeSystem.RadiusSegmentCount);
+        pipeSystem.GetRadius(progress) - pipeSystem.GetRadius(progress - 0.001f);
+    }*/
+
+    public Vector3 PositionForProgress(float instantProgress)
+    {
+        float T = spline.GetTForPosition(instantProgress);
+
+        Vector3 position = spline.GetPoint(T);
+
+        return position;
+    }
+
+    public float RadiusForProgress(float instantProgress, float instantRotation)
+    {
+        float radius = pipeSystem.GetRadius(instantProgress);
+
+        float lerpTemp = instantRotation / (360f / (2f * pipeSystem.RadiusSegmentCount)),
+            inRadius = radius * Mathf.Cos(Mathf.PI / pipeSystem.RadiusSegmentCount);
         bool even = false;
 
         if ((int)lerpTemp % 2 == 0)
         {
-            while(lerpTemp > 1f)
+            while (lerpTemp > 1f)
             {
                 lerpTemp--;
             }
@@ -93,14 +125,21 @@ public class SplineWalker : PipeObject{
             lerpTemp = 1f - lerpTemp;
 
         lerpTemp *= lerpTemp;
-        shipRadius = Mathf.Lerp(inRadius, shipRadius, lerpTemp) - offsetFromGrid;
+        radius = Mathf.Lerp(inRadius, radius, lerpTemp) - offsetFromGrid;
 
-        avatar.localPosition = new Vector3(0, -shipRadius, 0);
+        return radius;
+    }
 
-        float T = spline.GetTForPosition(progress);
+    public void UpdateAvatarLocation()
+    {
+        progress += Time.deltaTime * speed;
 
-        Vector3 position = spline.GetPoint(T);
+        Vector3 position = PositionForProgress(progress);
+
+        avatar.localPosition = new Vector3(0, -RadiusForProgress(progress, avatarRotation), 0);
+
         transform.localPosition = position;
+        float T = spline.GetTForPosition(progress);
 
         if (lookForward)
         {

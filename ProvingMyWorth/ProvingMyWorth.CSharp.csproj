@@ -96,6 +96,7 @@
   <ItemGroup>
     <None Include="Assets\Materials\Shaders\AlphaFade.shader" />
     <None Include="Assets\Materials\Shaders\DistanceBlur.shader" />
+    <None Include="Assets\Materials\Shaders\DoubleSided.shader" />
     <None Include="Assets\Materials\Shaders\Mirror.shader" />
     <None Include="Assets\Materials\Shaders\Std.shader" />
     <None Include="Assets\Materials\Shaders\Undulation.shader" />

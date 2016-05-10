@@ -21,4 +21,12 @@ public class PipeObject : MonoBehaviour {
 	void Update () {
 	
 	}
+
+    public BezierSpline Spline
+    {
+        get
+        {
+            return spline;
+        }
+    }
 }

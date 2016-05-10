@@ -17,6 +17,11 @@ public class PlayerShip : SplineWalker{
         GameObject curve = GameObject.Find("Curve");
         spline = curve.GetComponent<BezierSpline>();
 
+        if (gameObject.GetComponent<Rigidbody>())
+        {
+            rigidBody = gameObject.GetComponent<Rigidbody>();
+        }
+
         rotater = transform.GetChild(0);
         avatar = rotater.transform.GetChild(0);
 
@@ -35,6 +40,8 @@ public class PlayerShip : SplineWalker{
         float input;
 
         input = Input.GetAxis("Mouse X");
+
+        
         CalculateSpeed();
         UpdateAvatarRotation(input);
         UpdateAvatarLocation();

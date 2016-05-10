@@ -3,8 +3,8 @@ using System.Collections;
 
 public class SplinePipeSystem : MonoBehaviour {
 
-    public int pipeCount, radiusSegmentCount, curveSegmentCount;
-    public float ringDistance, radiusScale;
+    public int pipeCount, radiusSegmentCount, curveSegmentCount, radiusVariationNum;
+    public float ringDistance, radiusScale, minRadius, maxRadius;
 
     public Material material;
     public BezierSpline spline;
@@ -80,19 +80,19 @@ public class SplinePipeSystem : MonoBehaviour {
 
     void GenerateRadiusCurve()
     {
-        Keyframe[] keyFrames = new Keyframe[5];
+        Keyframe[] keyFrames = new Keyframe[radiusVariationNum];
 
         keyFrames[0].time = 0f;
         keyFrames[0].value = 0.5f;
-        keyFrames[4].time = spline.SplineLength;
-        keyFrames[4].value = 0.5f;
+        keyFrames[keyFrames.Length - 1].time = spline.SplineLength;
+        keyFrames[keyFrames.Length - 1].value = 0.5f;
 
         float delta = spline.SplineLength / keyFrames.Length;
 
         for (int i = 1; i < keyFrames.Length - 1; i++)
         {
             keyFrames[i].time = i * delta;
-            keyFrames[i].value = Random.Range(0.1f, 1.25f);
+            keyFrames[i].value = Random.Range(minRadius, maxRadius);
         }
 
         radiusCurve.postWrapMode = WrapMode.Clamp;
