@@ -71,9 +71,11 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Bezier.cs" />
     <Compile Include="Assets\Scripts\BezierSpline.cs" />
+    <Compile Include="Assets\Scripts\CarrierEnemy.cs" />
     <Compile Include="Assets\Scripts\FollowerShip.cs" />
     <Compile Include="Assets\Scripts\FollowerShipCollision.cs" />
     <Compile Include="Assets\Scripts\Laser.cs" />
+    <Compile Include="Assets\Scripts\LaserEnemy.cs" />
     <Compile Include="Assets\Scripts\MirrorReflection.cs" />
     <Compile Include="Assets\Scripts\PipeObject.cs" />
     <Compile Include="Assets\Scripts\PipeObstacle.cs" />

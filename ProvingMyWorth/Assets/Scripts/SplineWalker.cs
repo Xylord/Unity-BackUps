@@ -52,7 +52,7 @@ public class SplineWalker : PipeObject{
     {
         if (gameObject.GetComponent<Rigidbody>())
         {
-            avatar.localRotation = Quaternion.LookRotation(rigidBody.velocity, -avatar.localPosition);
+            //avatar.localRotation = Quaternion.LookRotation(rigidBody.velocity, -avatar.localPosition);
         }
     }
 

@@ -15,6 +15,6 @@ public class PlayerShipCollision : MonoBehaviour {
 
     void OnTriggerEnter (Collider col)
     {
-        print("Collision!");
+        //print("Collision!");
     }
 }

@@ -3,11 +3,8 @@ using System.Collections;
 
 public class FollowerShip : SplineWalker {
 
-    private PlayerShip player;
-    public Laser gun;
-    public Transform turret;
-    public float aimingTime, chargingDuration, shootingDuration, shootingRange;
-    private bool playerInRange, aiming, shooting;
+    public PlayerShip player;
+    public float time;
 
     // Use this for initialization
     void Start () {
@@ -27,12 +24,6 @@ public class FollowerShip : SplineWalker {
 
         rotater = transform.GetChild(0);
         avatar = rotater.transform.GetChild(0);
-        turret = avatar.GetChild(1).transform;
-        gun = turret.GetChild(1).GetComponent<Laser>();
-
-        shooting = false;
-        aiming = false;
-        playerInRange = false;
         spawnpoint = pipeSystem.PlayerStart - 100f;
         progress = spawnpoint;
         lookForward = true;
@@ -46,20 +37,13 @@ public class FollowerShip : SplineWalker {
         CheckForLooping();
         CalculateSpeed();
 
-        if (playerInRange && !aiming && !shooting)
-        {
-            //print("In Range");
-            StopCoroutine("TryForLaser");
-            StartCoroutine("TryForLaser");
-        }
-
-        UpdateAvatarRotation(SeekPlayer());
+        UpdateAvatarRotation(SeekTarget(player.AvatarRotation));
         UpdateAvatarLocation();
     }
 
-    IEnumerator TryForLaser()
+    /*IEnumerator TryForLaser()
     {
-        float time = 0f;
+        time = 0f;
         aiming = true;
         while (playerInRange)
         {
@@ -67,7 +51,7 @@ public class FollowerShip : SplineWalker {
 
             if(time > aimingTime)
             {
-                gun.FireLaser(chargingDuration, shootingDuration);
+                //gun.FireLaser(chargingDuration, shootingDuration);
                 shooting = true;
                 break;
             }
@@ -75,41 +59,15 @@ public class FollowerShip : SplineWalker {
             yield return null;
         }
         aiming = false;
-    }
-
-    /*IEnumerator ShootLaser()
-    {
-        float time = 0f;
-        shooting = true;
-
-        while (time < chargingDuration + shootingDuration)
-        {
-            time += Time.deltaTime;
-
-            if (time < chargingDuration)
-            {
-
-            }
-
-            else
-            {
-
-            }
-
-            yield return null;
-        }
-
-        shooting = false;
     }*/
+
+    
 
     override public void UpdateAvatarRotation(float lateralMovement)
     {
         shipRadius = pipeSystem.GetRadius(progress);
         lateralSpeed = 1f;// lateralMovement;
-        if (shooting)
-        {
-            lateralSpeed = 0f;
-        }
+        
         /*if (lateralSpeed < 0f)
             lateralSpeed += 0.01f;
 
@@ -132,7 +90,7 @@ public class FollowerShip : SplineWalker {
         rotater.localRotation = Quaternion.Euler(0f, 0f, avatarRotation);
     }
 
-    void CalculateSpeed()
+    public void CalculateSpeed()
     {
         if (progress < player.Progress - 100f)
             speed += 10f;
@@ -144,58 +102,42 @@ public class FollowerShip : SplineWalker {
             speed = player.speed + Random.Range(-10f, 10f);
     }
 
-    float DegreesToPlayer(float avatarRot, float playerRot)
+    public float DegreesToTarget(float avatarRot, float targetRot)
     {
-        float degreesToPlayer = avatarRot - playerRot;
+        float degreesToTarget = avatarRot - targetRot;
 
-        if ((degreesToPlayer > 0f && degreesToPlayer < 180f) || (degreesToPlayer < -180f))
+        if ((degreesToTarget > 0f && degreesToTarget < 180f) || (degreesToTarget < -180f))
         {
-            if (degreesToPlayer < -180f)
-                degreesToPlayer = -360f - degreesToPlayer;
+            if (degreesToTarget < -180f)
+                degreesToTarget = -360f - degreesToTarget;
             else
-                degreesToPlayer = -degreesToPlayer;
+                degreesToTarget = -degreesToTarget;
             
         }
 
-        else if ((degreesToPlayer > 180f) || (degreesToPlayer < 0f && degreesToPlayer > -180f))
+        else if ((degreesToTarget > 180f) || (degreesToTarget < 0f && degreesToTarget > -180f))
         {
-            if (degreesToPlayer > 180f)
-                degreesToPlayer = 360f - degreesToPlayer;
+            if (degreesToTarget > 180f)
+                degreesToTarget = 360f - degreesToTarget;
             else
-                degreesToPlayer = -degreesToPlayer;
+                degreesToTarget = -degreesToTarget;
         }
 
-        return degreesToPlayer;
+        return degreesToTarget;
     }
 
-    private float SeekPlayer()
+    virtual public float SeekTarget(float targetRotation)
     {
-        float degreesToPlayer = DegreesToPlayer(avatarRotation, player.AvatarRotation), lateralValue = 0f, degToDist = 2f * Mathf.PI * shipRadius / 360f;
+        float degreesToTarget = DegreesToTarget(avatarRotation, targetRotation), lateralValue = 0f, degToDist = 2f * Mathf.PI * shipRadius / 360f;
 
-        if (Mathf.Abs(degreesToPlayer) * degToDist < shootingRange)
-        {
-            print("In Range" + Mathf.Abs(degreesToPlayer) * degToDist);
-            playerInRange = true;
-        }
-        else
-        {
-            print("Not In Range" + Mathf.Abs(degreesToPlayer) * degToDist);
-            playerInRange = false;
-        }
-
-        if (Mathf.Abs(degreesToPlayer) * degToDist < 0.001f)
+        if (Mathf.Abs(degreesToTarget) * degToDist < 0.001f)
             return 0f;
 
         else
         {
-            lateralValue = degreesToPlayer * degToDist;
+            lateralValue = degreesToTarget * degToDist;
         }
 
         return lateralValue;
-    }
-
-    public void SetShooting(bool state)
-    {
-        shooting = state;
     }
 }

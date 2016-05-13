@@ -10,17 +10,22 @@ public class FollowerShipCollision : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
-	}
+        if (Input.GetButtonDown("Fire1"))
+        {
+            print("gotchu");
+            Explode();
+        }
+    }
 
     void OnTriggerEnter(Collider col)
     {
-        print("Collision!");
+        //print("Collision!");
         Explode();
     }
 
     void Explode()
     {
+        print("Pretty please");
         var exp = GetComponent<ParticleSystem>();
         exp.Play();
     }

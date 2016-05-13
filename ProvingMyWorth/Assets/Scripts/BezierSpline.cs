@@ -478,8 +478,8 @@ public class BezierSpline : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        float t = 0f;
-        int dots = 0;
+        //float t = 0f;
+        //int dots = 0;
 
         /*Vector3 point = GetPoint(GetTForPosition(splineLength - 10f));
         print(GetTForPosition(splineLength - 10f));
